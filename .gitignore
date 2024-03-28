@@ -2,7 +2,7 @@
 
 # dependencies
 node_modules/
-
+stremio-web
 # Expo
 .expo/
 dist/
