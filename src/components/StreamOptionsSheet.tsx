@@ -10,7 +10,7 @@ interface Props {
   loading: boolean;
   episodeStreams: any[];
   handleSheetChange: (index: number) => void;
-  onStreamSelect: (url: string) => void;
+  onStreamSelect: (streamData: any) => void;
 }
 
 const StreamOptionsSheet = forwardRef(

@@ -7,6 +7,7 @@ const initialState: IUserState = {
   loggedIn: false,
   user: undefined,
   token: null,
+  streamingURL: '',
 };
 
 const slice = createSlice({
@@ -20,6 +21,10 @@ const slice = createSlice({
     },
     setUser: (state: IUserState, { payload }: PayloadAction<IUser | undefined>) => {
       state.user = payload;
+    },
+    updateStreamingUrl: (state: IUserState, { payload }: PayloadAction<string>) => {
+      console.log(payload);
+      state.streamingURL = payload;
     },
     logout: () => initialState,
     reset: () => initialState,

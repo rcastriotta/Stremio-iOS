@@ -2,6 +2,7 @@ import axios from 'axios';
 import { useState } from 'react';
 import { IMedia, IAddon } from '../utils/types';
 import { useUserSlice } from '../store';
+import { NetworkInfo } from 'react-native-network-info';
 
 const baseUrl = 'https://api.strem.io/api';
 const stremioEndpoints = {
@@ -35,9 +36,10 @@ const useStremio = (): {
   updateVideoPosition: (data: IPositionUpdate) => Promise<void>;
   login: (email: string, password: string) => Promise<void>;
   logout: () => void;
+  getTorrentStreamURL: (infoHash: string, fileIdx: string) => string | null;
 } => {
   const [torrentioURL, setTorrentioURL] = useState(null);
-  const { reset, setLoggedIn, token, dispatch } = useUserSlice();
+  const { reset, setLoggedIn, token, dispatch, streamingURL } = useUserSlice();
 
   const makeStremioRequest = ({
     endpoint,
@@ -95,12 +97,32 @@ const useStremio = (): {
     return url;
   };
 
+  const generateRandomId = () => {
+    const characters = 'abcdef0123456789';
+    let id = '';
+
+    for (let i = 0; i < 32; i++) {
+      const randomIndex = Math.floor(Math.random() * characters.length);
+      id += characters[randomIndex];
+    }
+
+    return id;
+  };
+
   const getAvailableStreams = async (mediaURL: string, type: 'movie' | 'series') => {
     const addonURL = torrentioURL || (await getTorrentioURL());
     const d = await axios
       .get(addonURL.replace('/manifest.json', `/stream/${type}/${mediaURL}.json`))
       .then(({ data }) => data);
     return d.streams;
+  };
+
+  const getTorrentStreamURL = (infoHash: string, fileIdx: string) => {
+    if (!streamingURL) return null;
+    let parsedURL = String(streamingURL).endsWith('/') ? streamingURL : streamingURL + '/';
+    return `${parsedURL}hlsv2/${generateRandomId()}/master.m3u8?mediaURL=${encodeURIComponent(
+      `${parsedURL}${infoHash}/${fileIdx}`,
+    )}&videoCodecs=h264&videoCodecs=h265&videoCodecs=hevc&audioCodecs=aac&audioCodecs=mp3&audioCodecs=opus&maxAudioChannels=2`;
   };
 
   const updateVideoPosition = ({
@@ -174,6 +196,7 @@ const useStremio = (): {
     updateVideoPosition,
     login,
     logout,
+    getTorrentStreamURL,
   };
 };
 

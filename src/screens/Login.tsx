@@ -88,10 +88,12 @@ const Login = () => {
                 }}
                 render={({ field: { onChange, onBlur, value } }: any) => (
                   <TextInput
+                    autoCorrect={false}
                     keyboardAppearance="dark"
                     autoComplete="email"
                     className="flex-1"
                     placeholder="Email"
+                    keyboardType="email-address"
                     placeholderTextColor={colors.secondaryText}
                     selectionColor={'white'}
                     style={{ color: 'white' }}

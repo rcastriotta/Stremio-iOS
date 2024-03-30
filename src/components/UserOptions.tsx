@@ -1,20 +1,46 @@
 import React, { useRef, useCallback, useImperativeHandle, forwardRef, useMemo } from 'react';
-import { View, TouchableOpacity, Text } from 'react-native';
+import { View, TouchableOpacity, Text, Alert } from 'react-native';
 import BottomSheet, { BottomSheetBackdrop, BottomSheetScrollView } from '@gorhom/bottom-sheet';
 import { scale } from 'react-native-size-matters';
 import { useUserSlice } from '../store';
 
 const UserOptions = forwardRef((_, ref) => {
   const bottomSheetRef = useRef<BottomSheet>(null);
-  const { logout, dispatch } = useUserSlice();
+  const { logout, dispatch, updateStreamingUrl, streamingURL } = useUserSlice();
+
+  const configureStreamingURL = () => {
+    Alert.prompt(
+      'Update streaming URL',
+      'Enter computer or server IP address (ex. http://192.168.43.1:11470)',
+      [
+        {
+          text: 'Cancel',
+          style: 'cancel',
+        },
+        {
+          text: 'OK',
+          onPress: text => {
+            if (!text) return;
+            try {
+              const parsed = new URL(text);
+              dispatch(updateStreamingUrl(parsed.href));
+            } catch (err) {
+              Alert.alert('Invalid URL');
+            }
+          },
+        },
+      ],
+      'plain-text',
+      streamingURL,
+    );
+  };
 
   const options = useMemo(
     () => [
-      { name: 'Configure streaming URL', f: () => {} },
-      { name: 'Contact', f: () => {} },
+      { name: `Update Streaming URL`, f: configureStreamingURL },
       { name: 'Logout', f: () => dispatch(logout()) },
     ],
-    [logout],
+    [logout, configureStreamingURL, streamingURL],
   );
 
   useImperativeHandle(ref, () => ({

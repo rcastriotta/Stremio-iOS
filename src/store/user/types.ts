@@ -34,4 +34,5 @@ export interface IUserState {
   loggedIn: boolean;
   user?: IUser;
   token: string | null;
+  streamingURL: string;
 }

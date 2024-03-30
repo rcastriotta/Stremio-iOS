@@ -6,6 +6,7 @@ import {
   ScrollView,
   Text,
   ActivityIndicator,
+  Alert,
 } from 'react-native';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { BlurView } from 'expo-blur';
@@ -25,7 +26,7 @@ import FadedView from '../components/FadedView';
 const Preview = ({ navigation, route }: any) => {
   const routeData = route.params || {};
   const { getMediaInfo } = useCatalog();
-  const { getAvailableStreams } = useStremio();
+  const { getAvailableStreams, getTorrentStreamURL } = useStremio();
   const streamsSheetRef = useRef<any>();
   const seasonsSheetRef = useRef<any>();
   const [seasons, setSeasons] = useState({});
@@ -104,15 +105,29 @@ const Preview = ({ navigation, route }: any) => {
     return { activeMediaPosition: 0, activeMediaId: routeData.id };
   }, [cachedVideoPosition, routeData]);
 
-  const goToVideoPlayer = (url: string) => {
-    if (!url) return;
+  const goToVideoPlayer = (streamData: any) => {
+    const { url, infoHash, fileIdx } = streamData;
+    if (!url && !infoHash) {
+      Alert.alert('Error', 'Stream URL not found');
+      return;
+    }
+
     streamsSheetRef.current?.closeBottomSheet();
 
     const episodeToLoad = chosenMediaId.current;
     const currentVideoPosition = activeMediaId === chosenMediaId.current ? activeMediaPosition : 0;
 
+    let streamUrl = url;
+    if (!url) {
+      streamUrl = getTorrentStreamURL(infoHash, fileIdx);
+      if (!streamUrl) {
+        Alert.alert('Error', 'Add streaming server URL in settings');
+        return;
+      }
+    }
+
     navigation.navigate('VideoPlayer', {
-      url,
+      url: url || getTorrentStreamURL(infoHash, fileIdx),
       currentVideoPosition,
       activeEpisode: episodeToLoad,
       existingData: routeData,

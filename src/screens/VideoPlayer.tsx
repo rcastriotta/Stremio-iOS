@@ -1,5 +1,5 @@
 import { VLCPlayer } from 'react-native-vlc-media-player';
-import { View, TouchableOpacity, Text, SafeAreaView, Animated } from 'react-native';
+import { View, TouchableOpacity, Text, SafeAreaView, Animated, Alert } from 'react-native';
 import { BlurView } from 'expo-blur';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { scale } from 'react-native-size-matters';
@@ -28,6 +28,9 @@ const VideoPlayer = ({ navigation, route }: any) => {
   const [blockTouchEvents, setBlockTouchEvents] = useState(false);
   const lastServerUpdate = useRef<IVideoProgress | null>();
   const creationTime = useRef(existingData._ctime || new Date().toISOString());
+  const [textTrack, setTextTrack] = useState<any>(undefined);
+  const [videoScale, setVideoScale] = useState<number>(1);
+  const showErrorAlert = useRef(true);
 
   useEffect(() => {
     if (currentVideoPosition > 0) {
@@ -141,46 +144,104 @@ const VideoPlayer = ({ navigation, route }: any) => {
     }
   };
 
+  const onLoad = () => {
+    // fixes weird bug where subtitles show
+    setTextTrack(-1);
+  };
+
+  const onVideoFailed = () => {
+    if (!showErrorAlert.current) return;
+    showErrorAlert.current = false;
+    Alert.alert('Error', 'Video failed to load', [
+      {
+        text: 'OK',
+        onPress: () => navigation.goBack(),
+      },
+    ]);
+  };
+
+  useEffect(() => {
+    return () => {
+      showErrorAlert.current = false;
+    };
+  }, []);
+
   return (
     <TouchableOpacity className="flex-1 bg-black" activeOpacity={1} onPress={toggleControls}>
-      {useMemo(
-        () => (
-          <VLCPlayer
-            ref={videoPlayerRef}
-            style={{ flex: 1, backgroundColor: 'black' }}
-            source={{
-              uri: url,
-            }}
-            repeat={false}
-            autoAspectRatio={true}
-            onError={(e: any) => console.warn(e)}
-            onProgress={!disableSliderUpdates ? handleVideoProgressUpdate : undefined}
-            paused={paused}
-            muted={false}
-          />
-        ),
-        [url, paused, disableSliderUpdates, handleVideoProgressUpdate],
-      )}
+      <VLCPlayer
+        ref={videoPlayerRef}
+        style={{ flex: 1, backgroundColor: 'black', transform: [{ scale: videoScale }] }}
+        source={{
+          uri: url,
+        }}
+        repeat={false}
+        playInBackground={true}
+        autoAspectRatio={true}
+        onError={() => onVideoFailed()}
+        onProgress={!disableSliderUpdates ? handleVideoProgressUpdate : undefined}
+        paused={paused}
+        textTrack={textTrack}
+        muted={false}
+        onLoad={onLoad}
+      />
 
       <SafeAreaView className="z-[90] absolute w-full h-full">
         <View className="flex-1 justify-between p-[5vw] pb-[10px]">
-          <Animated.View
-            className="w-[11vw] aspect-[1]"
-            style={{
-              opacity: fadeAnim,
-              display: blockTouchEvents ? 'none' : 'flex',
-            }}>
-            <TouchableOpacity
-              onPress={() => navigation.goBack()}
-              activeOpacity={0.9}
-              className="flex-1">
-              <BlurView
-                className="w-full h-full rounded-[10px] overflow-hidden items-center justify-center "
-                tint="light">
-                <Ionicons name="close" size={scale(20)} color={colors.mainText} />
-              </BlurView>
-            </TouchableOpacity>
-          </Animated.View>
+          <View className="w-full justify-between flex-row">
+            <Animated.View
+              className="w-[11vw] aspect-[1]"
+              style={{
+                opacity: fadeAnim,
+                display: blockTouchEvents ? 'none' : 'flex',
+              }}>
+              <TouchableOpacity
+                onPress={() => navigation.goBack()}
+                activeOpacity={0.5}
+                className="flex-1">
+                <BlurView
+                  className="w-full h-full rounded-[10px] overflow-hidden items-center justify-center "
+                  tint="light">
+                  <Ionicons name="close" size={scale(20)} color={colors.mainText} />
+                </BlurView>
+              </TouchableOpacity>
+            </Animated.View>
+            <View className="space-x-2 flex-row">
+              <Animated.View
+                className="w-[11vw] aspect-[1]"
+                style={{
+                  opacity: fadeAnim,
+                  display: blockTouchEvents ? 'none' : 'flex',
+                }}>
+                <TouchableOpacity
+                  onPress={() => setVideoScale(p => p - 0.05)}
+                  activeOpacity={0.5}
+                  className="flex-1">
+                  <BlurView
+                    className="w-full h-full rounded-[10px] overflow-hidden items-center justify-center "
+                    tint="light">
+                    <Ionicons name="remove" size={scale(18)} color={colors.mainText} />
+                  </BlurView>
+                </TouchableOpacity>
+              </Animated.View>
+              <Animated.View
+                className="w-[11vw] aspect-[1]"
+                style={{
+                  opacity: fadeAnim,
+                  display: blockTouchEvents ? 'none' : 'flex',
+                }}>
+                <TouchableOpacity
+                  onPress={() => setVideoScale(p => p + 0.05)}
+                  activeOpacity={0.5}
+                  className="flex-1">
+                  <BlurView
+                    className="w-full h-full rounded-[10px] overflow-hidden items-center justify-center "
+                    tint="light">
+                    <Ionicons name="add" size={scale(18)} color={colors.mainText} />
+                  </BlurView>
+                </TouchableOpacity>
+              </Animated.View>
+            </View>
+          </View>
 
           <Animated.View
             className="w-[100%] h-[45px] rounded-[15px] overflow-hidden"
