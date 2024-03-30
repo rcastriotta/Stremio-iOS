@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "stremio-ios",
-    "slug": "stremio-ios",
+    "name": "Stremio",
+    "slug": "Stremio",
     "version": "1.0.0",
     "orientation": "all",
     "icon": "./assets/icon.png",
@@ -43,6 +43,11 @@
           "initialOrientation": "DEFAULT"
         }
       ]
-    ]
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "b61c7f75-2989-4e5d-8075-a27b0f42e4de"
+      }
+    }
   }
 }
