@@ -75,7 +75,7 @@ const SeriesDisplay = ({
                     {episodeInfo.episode || episodeInfo.number}. {episodeInfo.name}
                   </Text>
                   {activeMediaId === episodeInfo.id ? (
-                    <View className="w-[80%] h-[7px] rounded  bg-overlay mb-2">
+                    <View className="w-[80%] h-[7px] rounded overflow-hidden bg-overlay mb-2">
                       <View
                         className="bg-accent h-[7px] rounded"
                         style={{
