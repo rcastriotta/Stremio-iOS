@@ -1,12 +1,17 @@
 import axios from 'axios';
 
 const cinemetaBaseUrl = 'https://cinemeta-catalogs.strem.io';
-
-const cinemetaEndoints: { [id: string]: string } = {
-  topMovies: '/top/catalog/movie/top.json',
-  topSeries: '/top/catalog/series/top.json',
-  topRatedMovies: '/imdbRating/catalog/movie/imdbRating.json',
-  topRatedSeries: '/imdbRating/catalog/series/imdbRating.json',
+const scraperBaseUrl =
+  'https://7a82163c306e-stremio-netflix-catalog-addon.baby-beamup.club/aGJtLGhsdSxuZng6OnVzOjE3MTM5Njk2NDcyODM%3D/catalog';
+const contentEndpoints: { [id: string]: string } = {
+  topMovies: cinemetaBaseUrl + '/top/catalog/movie/top.json',
+  topSeries: cinemetaBaseUrl + '/top/catalog/series/top.json',
+  topRatedMovies: cinemetaBaseUrl + '/imdbRating/catalog/movie/imdbRating.json',
+  topRatedSeries: cinemetaBaseUrl + '/imdbRating/catalog/series/imdbRating.json',
+  topNetflixSeries: scraperBaseUrl + `series/nfx.json`,
+  topNetflixMovies: scraperBaseUrl + '/movie/nfx.json',
+  topHuluSeries: scraperBaseUrl + '/series/hlu.json',
+  topHuluMovies: scraperBaseUrl + '/movie/hlu.json',
 };
 
 const catalogs = [
@@ -14,6 +19,10 @@ const catalogs = [
   { id: 'topSeries', name: 'Top Series' },
   { id: 'topRatedMovies', name: 'Featured Movies' },
   { id: 'topRatedSeries', name: 'Featured Series' },
+  { id: 'topNetflixSeries', name: 'Top Netflix Series' },
+  { id: 'topNetflixMovies', name: 'Top Netflix Movies' },
+  { id: 'topHuluSeries', name: 'Top Hulu Series' },
+  { id: 'topHuluMovies', name: 'Top Hulu Movies' },
 ];
 
 const useCatalog = (): {
@@ -42,7 +51,7 @@ const useCatalog = (): {
   };
 
   const fetchCatalog = (type: string, pageParam: number = 0) => {
-    const url = cinemetaBaseUrl + cinemetaEndoints[type];
+    const url = contentEndpoints[type];
     const urlWithParam = pageParam > 0 ? url.replace('.json', `/skip=${pageParam}.json`) : url;
     console.log('fetching:', urlWithParam);
     return axios

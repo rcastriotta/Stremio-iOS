@@ -72,12 +72,17 @@ const MediaList = ({
   };
 
   const combinedData = useMemo(() => {
-    if (availableData) return availableData;
-    const rawData =
-      type === 'watchHistory'
-        ? data?.pages[0]
-        : data?.pages.reduce((combined, page) => [...combined, ...page.data], []);
-    return removeDuplicates(rawData || []).slice(0, maxSize);
+    try {
+      if (availableData) return availableData;
+      const rawData =
+        type === 'watchHistory'
+          ? data?.pages[0]
+          : (data?.pages || []).reduce((combined, page) => [...combined, ...page.data], []);
+      return removeDuplicates(rawData || []).slice(0, maxSize);
+    } catch (err) {
+      console.log(err);
+      return [];
+    }
   }, [data]);
 
   if (!isLoading && combinedData.length === 0) return <View />;
