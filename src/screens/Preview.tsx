@@ -214,24 +214,38 @@ const Preview = ({ navigation, route }: any) => {
 
           <FadedView>
             <View className="w-full px-[3vw]">
-              <View className={`flex-row space-x-1 mb-3 items-baseline`}>
-                {!isNaN(normalizedRating) &&
-                  new Array(5)
-                    .fill(null)
-                    .map((_, i) => (
-                      <Ionicons
-                        key={i}
-                        name={
-                          i < normalizedRating
-                            ? i + 1 > normalizedRating
-                              ? 'star-half-outline'
-                              : 'star'
-                            : 'star-outline'
-                        }
-                        color={colors.mainText}
-                        size={scale(15)}
-                      />
-                    ))}
+              <View className="flex-row mb-3 space-x-2 items-center">
+                <View className={`flex-row space-x-1 items-baseline`}>
+                  {!isNaN(normalizedRating) &&
+                    new Array(5)
+                      .fill(null)
+                      .map((_, i) => (
+                        <Ionicons
+                          key={i}
+                          name={
+                            i < normalizedRating
+                              ? i + 1 > normalizedRating
+                                ? 'star-half-outline'
+                                : 'star'
+                              : 'star-outline'
+                          }
+                          color={colors.mainText}
+                          size={scale(14.5)}
+                        />
+                      ))}
+                </View>
+                {!!data.year && (
+                  <View className="space-x-2 flex-row items-center">
+                    <Text
+                      style={{ color: 'rgba(255,255,255,0.7)' }}
+                      className={` ${textSizes.lg} font-bold`}>
+                      ·
+                    </Text>
+                    <Text className={`text-mainText ${textSizes.sm} font-bold mt-[3px]`}>
+                      {data.year.split('–')[0]}
+                    </Text>
+                  </View>
+                )}
               </View>
               <Text className={`text-mainText ${textSizes.lg} font-bold`}>{data.name}</Text>
 

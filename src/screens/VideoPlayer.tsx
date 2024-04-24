@@ -6,13 +6,14 @@ import { Slider } from '@miblanchard/react-native-slider';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import useStremio from '../hooks/useStremio';
 import { GestureDetector, Gesture } from 'react-native-gesture-handler';
-import Animated2, { useSharedValue, useAnimatedStyle } from 'react-native-reanimated';
+import Animated2, { useSharedValue, useAnimatedStyle, runOnJS } from 'react-native-reanimated';
 interface IVideoProgress {
   currentTime: number;
   duration: number;
   position: number;
   remainingTime: number;
 }
+const FADE_OUT_TRIGGER_LIMIT = 5000;
 const VideoPlayer = ({ navigation, route }: any) => {
   const { url, activeEpisode, existingData, currentVideoPosition, updateCachedVideoPosition } =
     route.params || {};
@@ -31,7 +32,8 @@ const VideoPlayer = ({ navigation, route }: any) => {
   const showErrorAlert = useRef(true);
   const savedScale = useSharedValue(1);
   const videoScale = useSharedValue(1);
-  const preventControlsToggle = useRef<boolean>(false);
+  const fadeOutTimeout = useRef<NodeJS.Timeout>();
+  const [enableControlToggle, setEnableControlToggle] = useState(true);
 
   useEffect(() => {
     if (currentVideoPosition > 0) {
@@ -40,16 +42,24 @@ const VideoPlayer = ({ navigation, route }: any) => {
   }, []);
 
   const fadeIn = () => {
+    clearTimeout(fadeOutTimeout.current);
     setBlockTouchEvents(false);
     Animated.timing(fadeAnim, { toValue: 1, duration: 200, useNativeDriver: true }).start(() => {
       setShowControls(true);
+      fadeOutTimeout.current = setTimeout(fadeOut, FADE_OUT_TRIGGER_LIMIT);
     });
   };
   const fadeOut = () => {
+    clearTimeout(fadeOutTimeout.current);
     Animated.timing(fadeAnim, { toValue: 0, duration: 200, useNativeDriver: true }).start(() => {
       setShowControls(false);
       setBlockTouchEvents(true);
     });
+  };
+
+  const resetFadeTimeout = () => {
+    clearTimeout(fadeOutTimeout.current);
+    fadeOutTimeout.current = setTimeout(fadeOut, FADE_OUT_TRIGGER_LIMIT);
   };
 
   const formatTime = (time: number) => {
@@ -72,12 +82,14 @@ const VideoPlayer = ({ navigation, route }: any) => {
     setTimeout(() => {
       setDisableSliderUpdates(false);
     }, 100);
+    resetFadeTimeout();
     if (!videoProgress) return;
     videoPlayerRef.current?.seek(Math.min(completion, 0.9999));
   };
 
   const skipForward = () => {
     if (!videoProgress) return;
+    resetFadeTimeout();
     const newTime = videoProgress.currentTime + 1000 * 10;
     const newPosition = newTime / videoProgress.duration;
     videoPlayerRef.current?.seek(Math.max(newPosition, 0));
@@ -85,6 +97,7 @@ const VideoPlayer = ({ navigation, route }: any) => {
 
   const skipBackward = () => {
     if (!videoProgress) return;
+    resetFadeTimeout();
     const newTime = videoProgress.currentTime - 1000 * 10;
     const newPosition = newTime / videoProgress.duration;
     videoPlayerRef.current?.seek(Math.max(newPosition, 0));
@@ -110,7 +123,7 @@ const VideoPlayer = ({ navigation, route }: any) => {
   }, [videoProgress]);
 
   const toggleControls = () => {
-    if (preventControlsToggle.current) return;
+    if (!enableControlToggle) return;
     if (showControls) {
       fadeOut();
     } else {
@@ -168,13 +181,21 @@ const VideoPlayer = ({ navigation, route }: any) => {
     };
   }, []);
 
+  const onPinchEvent = (enable: boolean, timeout: number) => {
+    setTimeout(() => {
+      setEnableControlToggle(enable);
+    }, timeout);
+  };
+
   const pinchGesture = Gesture.Pinch()
+    .onStart(() => {
+      runOnJS(onPinchEvent)(false, 0);
+    })
     .onUpdate(e => {
-      preventControlsToggle.current = true;
       videoScale.value = savedScale.value * e.scale;
     })
     .onEnd(() => {
-      preventControlsToggle.current = false;
+      runOnJS(onPinchEvent)(true, 100);
       savedScale.value = videoScale.value;
     });
 
