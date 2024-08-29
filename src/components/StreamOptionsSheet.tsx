@@ -11,10 +11,14 @@ interface Props {
   episodeStreams: any[];
   handleSheetChange: (index: number) => void;
   onStreamSelect: (streamData: any) => void;
+  onDownloadStream: (streamData: any) => void;
 }
 
 const StreamOptionsSheet = forwardRef(
-  ({ loading, episodeStreams, handleSheetChange, onStreamSelect }: Props, ref) => {
+  (
+    { loading, episodeStreams, handleSheetChange, onStreamSelect, onDownloadStream }: Props,
+    ref,
+  ) => {
     const bottomSheetRef = useRef<BottomSheet>(null);
 
     useImperativeHandle(ref, () => ({
@@ -65,6 +69,7 @@ const StreamOptionsSheet = forwardRef(
               <View className="w-full items-center">
                 {episodeStreams.length ? (
                   <StreamOptions
+                    onDownloadStream={onDownloadStream}
                     streamLinks={episodeStreams}
                     inBottomSheet={true}
                     onStreamSelect={onStreamSelect}

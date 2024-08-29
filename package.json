@@ -43,7 +43,9 @@
     "react-native-svg": "14.1.0",
     "react-native-vlc-media-player": "^1.0.67",
     "react-redux": "^9.1.0",
-    "redux-persist": "^6.0.0"
+    "redux-persist": "^6.0.0",
+    "expo-file-system": "~16.0.9",
+    "expo-crypto": "~12.8.1"
   },
   "devDependencies": {
     "@babel/core": "^7.20.0",

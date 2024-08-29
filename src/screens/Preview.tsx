@@ -22,6 +22,8 @@ import SeriesDisplay from '../components/SeriesDisplay';
 import SeasonPicker from '../components/SeasonPicker';
 import StreamOptionsSheet from '../components/StreamOptionsSheet';
 import FadedView from '../components/FadedView';
+import { startVideoDownload } from '../store/downloaded/slice';
+import { useDispatch } from 'react-redux';
 
 const Preview = ({ navigation, route }: any) => {
   const routeData = route.params || {};
@@ -37,8 +39,10 @@ const Preview = ({ navigation, route }: any) => {
     episodeId: string;
     position: number;
   } | null>();
+  const dispatch = useDispatch();
 
   const chosenMediaId = useRef<string>(routeData.state?.video_id || routeData.id);
+  const chosenEpisodeIndex = useRef<number>(-1);
 
   const { data: streamLinks, isLoading } = useQuery({
     queryKey: [`${routeData.id}-streams`],
@@ -69,9 +73,10 @@ const Preview = ({ navigation, route }: any) => {
     if (!isNaN(activeSeason)) setActiveSeason(activeSeason);
   }, [data]);
 
-  const onEpisodePress = async (id: string) => {
+  const onEpisodePress = async (id: string, index: number) => {
     try {
       chosenMediaId.current = id;
+      chosenEpisodeIndex.current = index;
       setEpisodeStreams([]);
       setLoadingEpisodeStreams(true);
       streamsSheetRef.current?.openBottomSheet();
@@ -104,6 +109,16 @@ const Preview = ({ navigation, route }: any) => {
     }
     return { activeMediaPosition: 0, activeMediaId: routeData.id };
   }, [cachedVideoPosition, routeData]);
+
+  const downloadStream = async (streamData: any) => {
+    let downloadName = data.name;
+    if (chosenEpisodeIndex.current !== -1) {
+      downloadName = `S${activeSeason} E${chosenEpisodeIndex.current} - ${data.name}`;
+    }
+
+    dispatch(startVideoDownload(streamData.url, downloadName, routeData.poster) as any);
+    navigation.navigate('Downloads');
+  };
 
   const goToVideoPlayer = (streamData: any) => {
     const { url, infoHash, fileIdx } = streamData;
@@ -154,6 +169,7 @@ const Preview = ({ navigation, route }: any) => {
           streamLinks={streamLinks}
           onStreamSelect={goToVideoPlayer}
           inBottomSheet={false}
+          onDownloadStream={downloadStream}
         />
       );
     } else {
@@ -309,6 +325,7 @@ const Preview = ({ navigation, route }: any) => {
         episodeStreams={episodeStreams}
         loading={loadingEpisodeStreams}
         onStreamSelect={goToVideoPlayer}
+        onDownloadStream={downloadStream}
       />
       <SeasonPicker
         ref={seasonsSheetRef}

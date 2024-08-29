@@ -1,7 +1,9 @@
 import { configureStore } from '@reduxjs/toolkit';
 import { persistStore, persistReducer } from 'redux-persist';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import app from '../store/user/slice';
+import userSlice from '../store/user/slice';
+import downloadedVideosSlice from '../store/downloaded/slice'; // Adjust this import path as needed
+
 import config from '../utils/config';
 
 const persistConfig = {
@@ -9,12 +11,13 @@ const persistConfig = {
   storage: AsyncStorage,
 };
 
-const persistedReducer = persistReducer(persistConfig, app);
+const persistedUserReducer = persistReducer(persistConfig, userSlice);
+const persistedDownloadsReducer = persistReducer(persistConfig, downloadedVideosSlice);
 
 const store = configureStore({
   reducer: {
-    app: persistedReducer,
-    // add more store ...
+    app: persistedUserReducer,
+    downloadedVideos: persistedDownloadsReducer,
   },
   middleware: getDefaultMiddleware =>
     getDefaultMiddleware({
@@ -25,6 +28,9 @@ const store = configureStore({
 
 export const persistor = persistStore(store);
 
+export type RootState = ReturnType<typeof store.getState>;
+export type AppDispatch = typeof store.dispatch;
 export type State = ReturnType<typeof store.getState>;
 export type Dispatch = typeof store.dispatch;
+
 export default store;

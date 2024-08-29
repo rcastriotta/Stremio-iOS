@@ -6,7 +6,7 @@ import { scale } from 'react-native-size-matters';
 interface SeriesDisplayProps {
   seasons: any;
   activeSeason: any;
-  onItemPress: (id: string) => void;
+  onItemPress: (id: string, index: number) => void;
   openSeasonPicker: (seasons: any[]) => void;
   activeMediaPosition: number;
   activeMediaId: string;
@@ -63,7 +63,7 @@ const SeriesDisplay = ({
           return (
             <View key={episodeInfo.id}>
               <TouchableOpacity
-                onPress={() => onItemPress(episodeInfo.id)}
+                onPress={() => onItemPress(episodeInfo.id, episodeInfo.number)}
                 className="flex-row items-center space-x-5"
                 activeOpacity={0.9}>
                 <Image

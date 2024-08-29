@@ -15,8 +15,14 @@ interface IVideoProgress {
 }
 const FADE_OUT_TRIGGER_LIMIT = 5000;
 const VideoPlayer = ({ navigation, route }: any) => {
-  const { url, activeEpisode, existingData, currentVideoPosition, updateCachedVideoPosition } =
-    route.params || {};
+  const {
+    url,
+    activeEpisode,
+    existingData,
+    currentVideoPosition,
+    updateCachedVideoPosition,
+    isOffline,
+  } = route.params || {};
   const { updateVideoPosition } = useStremio();
   const [paused, setPaused] = useState(false);
   const [videoProgress, setVideoProgress] = useState<IVideoProgress | null>(null);
@@ -27,7 +33,7 @@ const VideoPlayer = ({ navigation, route }: any) => {
   const fadeAnim = useRef(new Animated.Value(1)).current;
   const [blockTouchEvents, setBlockTouchEvents] = useState(false);
   const lastServerUpdate = useRef<IVideoProgress | null>();
-  const creationTime = useRef(existingData._ctime || new Date().toISOString());
+  const creationTime = useRef(existingData?._ctime || new Date().toISOString());
   const [textTrack, setTextTrack] = useState<any>(undefined);
   const showErrorAlert = useRef(true);
   const savedScale = useSharedValue(1);
@@ -140,6 +146,8 @@ const VideoPlayer = ({ navigation, route }: any) => {
       updateCachedVideoPosition({ episodeId: activeEpisode, position: value.position });
       lastUpdateSent.current = value;
     }
+
+    if (isOffline || !existingData) return;
 
     if (
       !lastServerUpdate.current ||
