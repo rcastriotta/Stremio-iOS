@@ -21,6 +21,7 @@ export interface IVideo {
   thumbnailDownloaded: boolean;
   downloadDate: string;
   thumbnailPath?: string;
+  fileSize: number;
 }
 
 export interface IDownloadedVideosState {

@@ -179,6 +179,7 @@ export const startVideoDownload =
         status: 'downloading',
         thumbnailPath,
         thumbnailDownloaded: false,
+        fileSize: 0, // Initialize file size as 0
       }),
     );
 
@@ -213,6 +214,18 @@ export const startVideoDownload =
 
       activeDownloads[id] = downloadResumable;
       await downloadResumable.downloadAsync();
+
+      // Get file info to update the file size
+      const fileInfo = await FileSystem.getInfoAsync(filePath);
+      if (fileInfo.exists && fileInfo.size) {
+        dispatch(
+          slice.actions.updateVideoData({
+            id,
+            data: { fileSize: fileInfo.size },
+          }),
+        );
+      }
+
       dispatch(slice.actions.updateVideoStatus({ id, status: 'downloaded' }));
       delete activeDownloads[id];
     } catch (error: any) {

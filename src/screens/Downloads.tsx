@@ -7,6 +7,7 @@ import { useDownloadedVideosSlice } from '../store/downloaded/slice';
 import { IVideo } from '../store/downloaded/types';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { textSizes } from '../theme/text';
+import { formatFileSize } from '../utils/utils';
 
 const capitalizeFirstLetter = (text: string) => {
   return text.charAt(0).toUpperCase() + text.slice(1);
@@ -96,9 +97,14 @@ export default function Downloads({ navigation }: any) {
                       )}
                     </View>
                   </View>
-                  <TouchableOpacity onPress={() => handleDeletePress(video)}>
-                    <Ionicons name="trash-outline" color={'rgba(255,255,255,0.5)'} size={20} />
-                  </TouchableOpacity>
+                  <View className="flex items-center space-y-2 ">
+                    <TouchableOpacity onPress={() => handleDeletePress(video)}>
+                      <Ionicons name="trash-outline" color={'rgba(255,255,255,0.5)'} size={20} />
+                    </TouchableOpacity>
+                    <Text style={{ color: 'rgba(255,255,255,0.7)', fontSize: 12 }}>
+                      {formatFileSize(video.fileSize || 0)}
+                    </Text>
+                  </View>
                 </TouchableOpacity>
               );
             })}
