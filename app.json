@@ -13,7 +13,10 @@
     "assetBundlePatterns": ["**/*"],
     "ios": {
       "supportsTablet": false,
-      "bundleIdentifier": "com.rcastriotta.stremioios"
+      "bundleIdentifier": "com.rcastriotta.stremioios",
+      "infoPlist": {
+        "NSDocumentsFolderUsageDescription": "This app needs access to the Documents folder to save downloaded videos."
+      }
     },
     "android": {
       "adaptiveIcon": {

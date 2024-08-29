@@ -46,6 +46,8 @@
 	</dict>
 	<key>NSMicrophoneUsageDescription</key>
 	<string>Allow $(PRODUCT_NAME) to access your microphone</string>
+	<key>NSDocumentsFolderUsageDescription</key>
+	<string>This app needs access to the Documents folder to save files.</string>
 	<key>UILaunchStoryboardName</key>
 	<string>SplashScreen</string>
 	<key>UIRequiredDeviceCapabilities</key>
