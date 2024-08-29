@@ -16,7 +16,7 @@ const persistedDownloadsReducer = persistReducer(persistConfig, downloadedVideos
 
 const store = configureStore({
   reducer: {
-    app: persistedUserReducer,
+    user: persistedUserReducer,
     downloadedVideos: persistedDownloadsReducer,
   },
   middleware: getDefaultMiddleware =>

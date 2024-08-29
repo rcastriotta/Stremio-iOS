@@ -33,7 +33,7 @@ const slice = createSlice({
 
 export function useUserSlice() {
   const dispatch = useDispatch<Dispatch>();
-  const state: any = useSelector(({ app }: State) => app);
+  const state: any = useSelector(({ user }: State) => user);
   return { dispatch, ...state, ...slice.actions };
 }
 
