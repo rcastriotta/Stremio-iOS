@@ -6,13 +6,18 @@ import downloadedVideosSlice from '../store/downloaded/slice'; // Adjust this im
 
 import config from '../utils/config';
 
-const persistConfig = {
-  key: 'root',
+const userPersistConfig = {
+  key: 'user',
   storage: AsyncStorage,
 };
 
-const persistedUserReducer = persistReducer(persistConfig, userSlice);
-const persistedDownloadsReducer = persistReducer(persistConfig, downloadedVideosSlice);
+const downloadsPersistConfig = {
+  key: 'downloads',
+  storage: AsyncStorage,
+};
+
+const persistedUserReducer = persistReducer(userPersistConfig, userSlice);
+const persistedDownloadsReducer = persistReducer(downloadsPersistConfig, downloadedVideosSlice);
 
 const store = configureStore({
   reducer: {
