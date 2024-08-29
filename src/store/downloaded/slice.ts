@@ -9,6 +9,8 @@ const initialState: IDownloadedVideosState = {
   videos: [],
 };
 
+let activeDownloads: { [key: string]: FileSystem.DownloadResumable } = {};
+
 const slice = createSlice({
   name: 'downloadedVideos',
   initialState,
@@ -23,6 +25,11 @@ const slice = createSlice({
         FileSystem.deleteAsync(videoToRemove.filePath, { idempotent: true }).catch(error =>
           console.error('Error deleting file:', error),
         );
+      }
+
+      if (activeDownloads[payload]) {
+        activeDownloads[payload].cancelAsync().catch(() => {});
+        delete activeDownloads[payload];
       }
 
       if (videoToRemove?.thumbnailPath) {
@@ -203,8 +210,10 @@ export const startVideoDownload =
         },
       );
 
+      activeDownloads[id] = downloadResumable;
       await downloadResumable.downloadAsync();
       dispatch(slice.actions.updateVideoStatus({ id, status: 'downloaded' }));
+      delete activeDownloads[id];
     } catch (error: any) {
       dispatch(
         slice.actions.setVideoError({
