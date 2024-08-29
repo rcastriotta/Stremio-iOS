@@ -46,7 +46,7 @@ const StreamOptions = ({
                 activeOpacity={0.8}
                 onPress={() => onDownloadStream(streamData)}
                 className="w-[30px] h-[30px] bg-accent rounded-full items-center justify-center">
-                <Ionicons name="arrow-down" color={'white'} size={20} />
+                <Ionicons name="arrow-down" color={'white'} size={18} />
               </TouchableOpacity>
             </TouchableOpacity>
             {!isLast && !inBottomSheet && <View className="w-full h-[2px] bg-overlay my-[22px]" />}
