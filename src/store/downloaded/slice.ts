@@ -4,6 +4,7 @@ import { State, Dispatch } from '../../utils/store';
 import { IDownloadedVideosState, IVideo } from './types';
 import * as FileSystem from 'expo-file-system';
 import { randomUUID } from 'expo-crypto';
+import { Alert } from 'react-native';
 
 const initialState: IDownloadedVideosState = {
   videos: [],
@@ -227,6 +228,7 @@ export const startVideoDownload =
           status: 'error',
         }),
       );
+      Alert.alert(error?.message || 'An error occurred during download');
     }
   };
 
