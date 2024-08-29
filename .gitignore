@@ -33,4 +33,6 @@ yarn-error.*
 
 # typescript
 *.tsbuildinfo
-stremio.ipa
+stremio.ip
+dist
+instructions.txt
