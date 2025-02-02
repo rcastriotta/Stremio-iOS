@@ -34,12 +34,16 @@ const VideoPlayer = ({ navigation, route }: any) => {
   const [blockTouchEvents, setBlockTouchEvents] = useState(false);
   const lastServerUpdate = useRef<IVideoProgress | null>();
   const creationTime = useRef(existingData?._ctime || new Date().toISOString());
-  const [textTrack, setTextTrack] = useState<any>(undefined);
+  const [textTracks, setTextTracks] = useState<any[]>([]);
+  const [textTrack, setTextTrack] = useState<number>(-1);
+  const [audioTracks, setAudioTracks] = useState<any[]>([]);
+  const [audioTrack, setAudioTrack] = useState<number>(-1);
   const showErrorAlert = useRef(true);
   const savedScale = useSharedValue(1);
   const videoScale = useSharedValue(1);
   const fadeOutTimeout = useRef<NodeJS.Timeout>();
   const [enableControlToggle, setEnableControlToggle] = useState(true);
+  const [showSubtitleSettings, setShowSubtitleSettings] = useState(false);
 
   useEffect(() => {
     if (currentVideoPosition > 0) {
@@ -168,8 +172,13 @@ const VideoPlayer = ({ navigation, route }: any) => {
   };
 
   const onLoad = (e: any) => {
-    // fixes weird bug where subtitles show
     setTextTrack(-1);
+    if (e.textTracks) {
+      setTextTracks(e.textTracks);
+    }
+    if (e.audioTracks) {
+      setAudioTracks(e.audioTracks);
+    }
   };
 
   const onVideoFailed = () => {
@@ -212,6 +221,16 @@ const VideoPlayer = ({ navigation, route }: any) => {
     flex: 1,
   }));
 
+  const handleSubtitleSettingsPress = () => {
+    if (showSubtitleSettings) {
+      resetFadeTimeout();
+      setShowSubtitleSettings(false);
+    } else {
+      clearTimeout(fadeOutTimeout.current);
+      setShowSubtitleSettings(true);
+    }
+  };
+
   return (
     <TouchableOpacity className="flex-1 bg-black" activeOpacity={1} onPress={toggleControls}>
       <Animated2.View style={[animatedStyle]}>
@@ -228,6 +247,7 @@ const VideoPlayer = ({ navigation, route }: any) => {
           onProgress={!disableSliderUpdates ? handleVideoProgressUpdate : undefined}
           paused={paused}
           textTrack={textTrack}
+          audioTrack={audioTrack}
           muted={false}
           onLoad={onLoad}
         />
@@ -246,7 +266,68 @@ const VideoPlayer = ({ navigation, route }: any) => {
                 <TouchableOpacity onPress={() => navigation.goBack()} activeOpacity={0.5}>
                   <Ionicons name="close" size={scale(30)} color={'rgba(255,255,255,0.7)'} />
                 </TouchableOpacity>
+                <TouchableOpacity
+                  onPress={handleSubtitleSettingsPress}
+                  activeOpacity={0.5}
+                  className={showSubtitleSettings ? 'bg-white/30 rounded-full p-1' : 'p-1'}>
+                  <Ionicons
+                    name="settings-outline"
+                    size={scale(25)}
+                    color={'rgba(255,255,255,0.7)'}
+                  />
+                </TouchableOpacity>
               </View>
+
+              {showSubtitleSettings && (
+                <View className="absolute right-[5vw] top-[70] z-50">
+                  <View className="bg-black/80 rounded-lg p-4">
+                    <View className="flex-row space-x-4">
+                      <View className="space-y-2">
+                        <Text className="text-white/70 mb-2">Subtitle Track</Text>
+                        {!textTracks.some(track => track.id === -1) && (
+                          <TouchableOpacity
+                            onPress={() => setTextTrack(-1)}
+                            className={`px-3 py-2 rounded ${
+                              textTrack === -1 ? 'bg-white/30' : 'bg-white/10'
+                            }`}>
+                            <Text className="text-white max-w-[150px]" numberOfLines={1}>
+                              Off
+                            </Text>
+                          </TouchableOpacity>
+                        )}
+                        {textTracks.map((track, index) => (
+                          <TouchableOpacity
+                            key={index}
+                            onPress={() => setTextTrack(track.id)}
+                            className={`px-3 py-2 rounded ${
+                              textTrack === track.id ? 'bg-white/30' : 'bg-white/10'
+                            }`}>
+                            <Text className="text-white max-w-[150px]" numberOfLines={1}>
+                              {track.name || `Track ${index + 1}`}
+                            </Text>
+                          </TouchableOpacity>
+                        ))}
+                      </View>
+
+                      <View className="space-y-2">
+                        <Text className="text-white/70 mb-2">Audio Track</Text>
+                        {audioTracks.map((track, index) => (
+                          <TouchableOpacity
+                            key={index}
+                            onPress={() => setAudioTrack(track.id)}
+                            className={`px-3 py-2 rounded ${
+                              audioTrack === track.id ? 'bg-white/30' : 'bg-white/10'
+                            }`}>
+                            <Text className="text-white max-w-[150px]" numberOfLines={1}>
+                              {track.name || `Audio ${index + 1}`}
+                            </Text>
+                          </TouchableOpacity>
+                        ))}
+                      </View>
+                    </View>
+                  </View>
+                </View>
+              )}
 
               <View
                 className="w-full justify-evenly flex-row items-center absolute top-0 bottom-0"
